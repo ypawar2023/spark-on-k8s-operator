@@ -15,6 +15,12 @@
 #
 
 ARG SPARK_IMAGE=gcr.io/spark-operator/spark:v3.1.1
+ARG user=appuser
+ARG group=appuser
+ARG uid=1000
+ARG gid=1000
+
+
 
 FROM golang:1.19.2-alpine as builder
 
@@ -44,4 +50,8 @@ RUN apt-get update --allow-releaseinfo-change \
 COPY hack/gencerts.sh /usr/bin/
 
 COPY entrypoint.sh /usr/bin/
+RUN groupadd -g ${gid} ${group}
+RUN useradd -u ${uid} -g ${group} -s /bin/sh -m ${user} # <--- the '-m' create a user home directory
+USER ${uid}:${gid}
+
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
